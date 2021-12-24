@@ -349,8 +349,8 @@ class Server():
             out_frame = self.clip.get_frame_async(frame).result()
             self.last_queued_frame = frame
         frame_data = []
-        for plane in out_frame.planes():
-            frame_data.append(np.asarray(plane))
+        for plane in range(out_frame.format.num_planes):
+            frame_data.append(np.asarray(out_frame.get_read_array(plane)))
         frame_data = lzo.compress(pickle.dumps(
             frame_data), self.compression_level)
         if pipe:
@@ -394,7 +394,7 @@ class Server():
             except KeyError:
                 out_frame = self.clip.get_frame_async(frame).result()
                 self.last_queued_frame = frame
-            frame_data = [np.asarray(plane) for plane in out_frame.planes()]
+            frame_data = [np.asarray(out_frame.get_read_array(plane)) for plane in range(out_frame.format.num_planes)]
             frame_props = dict(out_frame.props)
         if self.compression_method == 'lzo' and self.compression_threads == 1:
             frame_data = lzo.compress(pickle.dumps(
